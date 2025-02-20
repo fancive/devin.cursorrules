@@ -20,12 +20,12 @@ The screenshot verification workflow allows you to capture screenshots of web pa
 
 1. Screenshot Capture:
 ```bash
-venv/bin/python tools/screenshot_utils.py URL [--output OUTPUT] [--width WIDTH] [--height HEIGHT]
+conda run -n py310 python tools/screenshot_utils.py URL [--output OUTPUT] [--width WIDTH] [--height HEIGHT]
 ```
 
 2. LLM Verification with Images:
 ```bash
-venv/bin/python tools/llm_api.py --prompt "Your verification question" --provider {openai|anthropic} --image path/to/screenshot.png
+conda run -n py310 python tools/llm_api.py --prompt "Your verification question" --provider {openai|anthropic} --image path/to/screenshot.png
 ```
 
 Example workflow:
@@ -51,7 +51,7 @@ print(response)
 
 You always have an LLM at your side to help you with the task. For simple tasks, you could invoke the LLM by running the following command:
 ```
-venv/bin/python ./tools/llm_api.py --prompt "What is the capital of France?" --provider "anthropic"
+conda run -n py310 python ./tools/llm_api.py --prompt "What is the capital of France?" --provider "anthropic"
 ```
 
 The LLM API supports multiple providers:
@@ -68,7 +68,7 @@ But usually it's a better idea to check the content of the file and use the APIs
 
 You could use the `tools/web_scraper.py` file to scrape the web.
 ```
-venv/bin/python ./tools/web_scraper.py --max-concurrent 3 URL1 URL2 URL3
+conda run -n py310 python ./tools/web_scraper.py --max-concurrent 3 URL1 URL2 URL3
 ```
 This will output the content of the web pages.
 
@@ -76,7 +76,7 @@ This will output the content of the web pages.
 
 You could use the `tools/search_engine.py` file to search the web.
 ```
-venv/bin/python ./tools/search_engine.py "your search keywords"
+conda run -n py310 python ./tools/search_engine.py "your search keywords"
 ```
 This will output the search results in the following format:
 ```
@@ -86,11 +86,63 @@ Snippet: This is a snippet of the search result
 ```
 If needed, you can further use the `web_scraper.py` file to scrape the web page content.
 
+## Database
+
+You can use the `tools/db_utils.py` file to interact with MySQL databases. The following commands are available:
+
+1. Execute SQL query:
+```bash
+conda run -n py310 python ./tools/db_utils.py query --query "SELECT * FROM users LIMIT 10" [--output-format {csv|json}]
+```
+
+2. List all tables in the database:
+```bash
+conda run -n py310 python ./tools/db_utils.py list-tables
+```
+
+3. Describe table structure:
+```bash
+conda run -n py310 python ./tools/db_utils.py describe-table --table users [--output-format {csv|json}]
+```
+
+The database connection parameters are configured in the script with sensible defaults, but you can override them using command-line arguments:
+```bash
+conda run -n py310 python ./tools/db_utils.py query --query "SELECT * FROM users" --host localhost --port 3306 --username root --password mypassword --dbname mydb
+```
+
+## Redis
+
+You can use the `tools/redis_utils.py` file to interact with Redis. The tool accepts Redis commands directly as arguments:
+
+```bash
+conda run -n py310 python ./tools/redis_utils.py get mykey
+conda run -n py310 python ./tools/redis_utils.py set mykey myvalue
+conda run -n py310 python ./tools/redis_utils.py del mykey
+conda run -n py310 python ./tools/redis_utils.py keys "user:*"
+```
+
+Supported Redis commands:
+- `get` - Get value of a key
+- `set` - Set value of a key (with optional expiration: `set mykey myvalue EX 3600`)
+- `del` - Delete one or more keys
+- `keys` - List keys matching a pattern
+- `hget` - Get field from a hash
+- `hgetall` - Get all fields from a hash
+- `hset` - Set field in a hash
+- `lrange` - Get elements from a list
+- `lpush` - Push element to the left of a list
+- `rpush` - Push element to the right of a list
+
+You can override the Redis connection parameters:
+```bash
+conda run -n py310 python ./tools/redis_utils.py --host redis-server --port 6380 --db 1 get mykey
+```
+
 # Lessons
 
 ## User Specified Lessons
 
-- You have a python venv in ./venv. Use it.
+- You have a conda environment named py310. Use it with `conda run -n py310 python`.
 - Include info useful for debugging in the program output.
 - Read the file before you try to edit it.
 - Due to Cursor's limit, when you use `git` and `gh` and need to submit a multiline commit message, first write the message in a file, and then use `git commit -F <filename>` or similar command to commit. And then remove the file. Include "[Cursor] " in the commit message and PR title.
